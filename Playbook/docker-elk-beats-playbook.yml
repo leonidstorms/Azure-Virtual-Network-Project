@@ -1,0 +1,117 @@
+## This playbook should install Docker/Filebeat/Metricbeat on [webservers] and start ELK on [elkservers]
+---
+  - name: Config Web VM with Docker 
+    hosts: webservers
+    become: true
+    tasks:
+
+    - name: docker.io
+      apt:
+        force_apt_get: yes
+        name: docker.io
+        state: present
+
+    - name: Install python-pip
+      apt:
+        force_apt_get: yes
+        name: python-pip
+        state: present
+
+    - name: Install Docker python module
+      pip:
+        name: docker
+        state: present
+
+    - name: Download and launch a docker web container
+      docker_container:
+        name: dvwa
+        image: cyberxsecurity/dvwa
+        state: started
+        published_ports: 80:80
+
+## Install ELK 
+  - name: Install elk
+    hosts: elkservers
+    remote_user: ansible
+    become: true
+    tasks:
+
+    - name: Increase VM memory
+      command: sysctl -w vm.max_map_count=262144
+
+    - name: docker.io
+      apt:
+        force_apt_get: yes
+        name: docker.io
+        state: present
+
+    - name: Install python-pip
+      apt:
+        force_apt_get: yes
+        name: python-pip
+        state: present
+
+    - name: Install Docker python module
+      pip:
+        name: docker
+        state: present
+
+    - name: Download and launch a docker elk container
+      docker_container:
+        name: elk
+        image: sebp/elk
+        state: started
+        published_ports:
+          - "5601:5601"
+          - "9200:9200"
+          - "5044:5044"
+
+    - name: Pause for kibana to initialize
+      pause:
+        minutes: 1
+
+## Filebeat/Metricbeat Install
+  - name: Copy Filebeat and Metricbeat config and install Filebeat and Metricbeat
+    hosts: webservers
+    become: true
+    tasks:
+
+    - name: Download Filebeat .deb
+      command: curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.6.1-amd64.deb
+
+    - name: Install Filebeat .deb
+      command: sudo dpkg -i filebeat-7.6.1-amd64.deb
+
+    - name: Copy filebeat config
+      copy:
+        src: /etc/ansible/files/filebeat-configuration.yml
+        dest: /etc/filebeat/filebeat.yml
+
+    - name: Enable Filebeat
+      command: filebeat modules enable system
+
+    - name: Setup Filebeat 
+      command: filebeat setup
+
+    - name: Start Filebeat
+      command: service filebeat start
+      
+    - name: Download Metricbeat .deb
+      command: curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.6.1-amd64.deb
+
+    - name: Install Metricbeat .deb
+      command: sudo dpkg -i metricbeat-7.6.1-amd64.deb
+
+    - name: Copy Metricbeat config
+      copy: 
+        src: /etc/ansible/files/metricbeat-configuration.yml
+        dest: /etc/metricbeat/metricbeat.yml
+
+    - name: Enable Metricbeat
+      command: metricbeat modules enable docker
+
+    - name: Setup Metricbeat
+      command: metricbeat setup
+
+    - name: Start Metricbeat
+      command: service metricbeat start
