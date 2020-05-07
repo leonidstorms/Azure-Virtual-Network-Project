@@ -26,7 +26,7 @@ Load balancing ensures that the application will be highly available, in additio
 
 Integrating an ELK server allows users to easily monitor the vulnerable VMs for changes to the _____ and system _____.
 - Filebeat monitors and collects log files from specified locations and sends them to the ELK stack.
-- Metricbeat collects operating system metrics 
+- Metricbeat collects operating system metrics to send to ELK.
 
 The configuration details of each machine may be found below.
 
