@@ -24,7 +24,7 @@ The main purpose of this network is to expose a load-balanced and monitored inst
 Load balancing ensures that the application will be highly available, in addition to restricting access to the network.
 - Load balancers protect the availability of data by providing levels of redundancy in case a server fails or needs to be taken down for maintenance. A jumpbox allows system administrators to configure multiple machines within a security group, from a single machine outside that group, eliminating the need for public access to those devices, and reducing opportunities for malicious activity.
 
-Integrating an ELK server allows users to easily monitor the vulnerable VMs for changes to the _____ and system _____.
+Integrating an ELK server allows users to easily monitor the vulnerable VMs.
 - Filebeat monitors and collects log files from specified locations and sends them to the ELK stack.
 - Metricbeat collects operating system metrics to send to ELK.
 
